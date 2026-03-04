@@ -1,0 +1,142 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Spirometry Reference Calculator — Kainu et al. (2015)</title>
+    <meta name="description" content="Finnish spirometry reference values calculator. Predicted values, LLN, z-scores and percent predicted using Kainu et al. (2015) equations." />
+  </head>
+  <body>
+    <div class="app" id="app">
+      <!-- Header -->
+      <header class="header">
+        <div class="header-left">
+          <h1 id="app-title">Spirometry Reference Calculator</h1>
+          <p id="app-subtitle">Finnish reference values — Kainu et al. (2015)</p>
+        </div>
+        <div class="header-actions">
+          <button class="btn-icon" id="help-toggle" type="button" aria-label="Help" title="Help">?</button>
+          <button class="btn-icon" id="lang-toggle" type="button" aria-label="Switch language">FI</button>
+        </div>
+      </header>
+
+      <!-- Help Panel -->
+      <div class="help-panel" id="help-panel" role="region" aria-label="Help">
+        <div id="help-content"></div>
+      </div>
+
+      <!-- 1. Patient settings -->
+      <div class="card">
+        <h2 id="section-patient">1. Patient</h2>
+        <div class="grid">
+          <div class="field-group">
+            <label for="age" id="label-age">Age (years)</label>
+            <input id="age" type="number" min="18" max="100" step="1" value="50">
+          </div>
+          <div class="field-group">
+            <label for="height" id="label-height">Height (cm)</label>
+            <input id="height" type="number" min="100" max="220" step="1" value="175">
+          </div>
+          <div class="field-group">
+            <label id="label-sex">Sex</label>
+            <div class="radio-group">
+              <label class="radio-label">
+                <input type="radio" name="sex" value="1" checked>
+                <span id="label-male">Male</span>
+              </label>
+              <label class="radio-label">
+                <input type="radio" name="sex" value="2">
+                <span id="label-female">Female</span>
+              </label>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 2. Measured values -->
+      <div class="card">
+        <h2 id="section-measured">2. Measured values (optional)</h2>
+        <small id="measured-hint" class="hint">Enter measured values to compute z-scores and % predicted. Leave empty to see reference values only.</small>
+        <div class="grid" id="core-inputs">
+          <div class="field-group">
+            <label for="m-FEV1">FEV₁ (L)</label>
+            <input id="m-FEV1" type="number" step="0.01" min="0" placeholder="e.g. 3.50">
+          </div>
+          <div class="field-group">
+            <label for="m-FVC">FVC (L)</label>
+            <input id="m-FVC" type="number" step="0.01" min="0" placeholder="e.g. 4.50">
+          </div>
+          <div class="field-group">
+            <label for="m-FEV1FVC">FEV₁/FVC (ratio)</label>
+            <input id="m-FEV1FVC" type="number" step="0.01" min="0" max="1" placeholder="e.g. 0.78">
+          </div>
+          <div class="field-group">
+            <label for="m-PEF">PEF (L/s)</label>
+            <input id="m-PEF" type="number" step="0.1" min="0" placeholder="e.g. 9.5">
+          </div>
+        </div>
+        <button type="button" class="btn-ghost" id="btn-advanced">Show advanced parameters</button>
+        <div class="grid hidden" id="advanced-inputs">
+          <div class="field-group">
+            <label for="m-FEV6">FEV₆ (L)</label>
+            <input id="m-FEV6" type="number" step="0.01" min="0">
+          </div>
+          <div class="field-group">
+            <label for="m-FEV1FEV6">FEV₁/FEV₆ (ratio)</label>
+            <input id="m-FEV1FEV6" type="number" step="0.01" min="0" max="1">
+          </div>
+          <div class="field-group">
+            <label for="m-MMEF">MMEF (L/s)</label>
+            <input id="m-MMEF" type="number" step="0.01" min="0">
+          </div>
+          <div class="field-group">
+            <label for="m-MEF75">MEF₇₅ (L/s)</label>
+            <input id="m-MEF75" type="number" step="0.01" min="0">
+          </div>
+          <div class="field-group">
+            <label for="m-MEF50">MEF₅₀ (L/s)</label>
+            <input id="m-MEF50" type="number" step="0.01" min="0">
+          </div>
+          <div class="field-group">
+            <label for="m-MEF25">MEF₂₅ (L/s)</label>
+            <input id="m-MEF25" type="number" step="0.01" min="0">
+          </div>
+        </div>
+      </div>
+
+      <!-- 3. Results -->
+      <div class="card">
+        <h2 id="section-results">3. Reference values</h2>
+        <div class="table-wrapper">
+          <table class="results-table" id="results-table">
+            <thead>
+              <tr>
+                <th scope="col" id="th-param">Parameter</th>
+                <th scope="col" id="th-unit">Unit</th>
+                <th scope="col" id="th-measured">Measured</th>
+                <th scope="col" id="th-predicted">Predicted</th>
+                <th scope="col" id="th-lln">LLN</th>
+                <th scope="col" id="th-zscore">Z-score</th>
+                <th scope="col" id="th-pctpred">% Pred</th>
+                <th scope="col" id="th-status">Status</th>
+              </tr>
+            </thead>
+            <tbody id="results-body"></tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Footer -->
+      <footer class="footer">
+        <p id="footer-ref" class="footer-ref"></p>
+        <p id="footer-note" class="footer-note"></p>
+        <p class="footer-links">
+          <span id="footer-rpkg"></span> <a href="https://github.com/rikhardfi/rkainu" target="_blank" rel="noopener">rikhardfi/rkainu</a>
+          · <a href="https://rikhard.fi/calculators" target="_blank" rel="noopener">rikhard.fi</a>
+        </p>
+      </footer>
+    </div>
+
+    <script type="module" src="/src/main.js"></script>
+  </body>
+</html>
