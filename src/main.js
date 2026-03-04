@@ -7,12 +7,15 @@ const els = {
   age: document.getElementById('age'),
   height: document.getElementById('height'),
   resultsBody: document.getElementById('results-body'),
+  resultsTheadRow: document.getElementById('results-thead-row'),
+  resultsTable: document.getElementById('results-table'),
   langToggle: document.getElementById('lang-toggle'),
   helpToggle: document.getElementById('help-toggle'),
   helpPanel: document.getElementById('help-panel'),
   helpContent: document.getElementById('help-content'),
   btnAdvanced: document.getElementById('btn-advanced'),
   advancedInputs: document.getElementById('advanced-inputs'),
+  interpretationContent: document.getElementById('interpretation-content'),
 };
 
 function getSex() {
@@ -21,15 +24,84 @@ function getSex() {
 }
 
 const PARAM_UNITS = {
-  FEV1: 'unitL', FVC: 'unitL', FEV1FVC: 'unitRatio',
+  VC: 'unitL', FEV1: 'unitL', FVC: 'unitL', FEV1FVC: 'unitRatio',
   FEV6: 'unitL', FEV1FEV6: 'unitRatio',
   PEF: 'unitLs', MMEF: 'unitLs', MEF75: 'unitLs', MEF50: 'unitLs', MEF25: 'unitLs',
 };
 
 const PARAM_DECIMALS = {
-  FEV1: 2, FVC: 2, FEV1FVC: 3, FEV6: 2, FEV1FEV6: 3,
+  VC: 2, FEV1: 2, FVC: 2, FEV1FVC: 3, FEV6: 2, FEV1FEV6: 3,
   PEF: 1, MMEF: 2, MEF75: 2, MEF50: 2, MEF25: 2,
 };
+
+// --- Auto-calculate FEV1/FVC ---
+function autoCalcRatio(phase) {
+  const fev1El = document.getElementById(`${phase}-FEV1`);
+  const fvcEl = document.getElementById(`${phase}-FVC`);
+  const ratioEl = document.getElementById(`${phase}-FEV1FVC`);
+  if (!fev1El || !fvcEl || !ratioEl) return;
+
+  const fev1 = parseFloat(fev1El.value);
+  const fvc = parseFloat(fvcEl.value);
+
+  if (isFinite(fev1) && fev1 > 0 && isFinite(fvc) && fvc > 0) {
+    ratioEl.value = (fev1 / fvc).toFixed(3);
+    ratioEl.classList.add('auto-calc');
+    ratioEl.readOnly = true;
+  } else if (ratioEl.readOnly) {
+    ratioEl.value = '';
+    ratioEl.classList.remove('auto-calc');
+    ratioEl.readOnly = false;
+  }
+}
+
+// --- Helpers ---
+function getMeasured(phase, param) {
+  const el = document.getElementById(`${phase}-${param}`);
+  return el ? parseFloat(el.value) : NaN;
+}
+
+function hasAnyPostBD() {
+  return PARAMS.some((p) => {
+    const v = getMeasured('post', p);
+    return isFinite(v) && v > 0;
+  });
+}
+
+function capitalize(s) {
+  return s.charAt(0).toUpperCase() + s.slice(1);
+}
+
+// --- Dynamic table headers ---
+function updateTableHeaders(postBD) {
+  if (postBD) {
+    els.resultsTable.classList.add('has-post-bd');
+    els.resultsTheadRow.innerHTML = `
+      <th scope="col">${t('thParam')}</th>
+      <th scope="col">${t('thUnit')}</th>
+      <th scope="col">${t('thPreBD')}</th>
+      <th scope="col">${t('thPostBD')}</th>
+      <th scope="col">${t('thPredicted')}</th>
+      <th scope="col">${t('thLLN')}</th>
+      <th scope="col">${t('thZscore')}</th>
+      <th scope="col">${t('thPctPred')}</th>
+      <th scope="col">${t('thChange')}</th>
+      <th scope="col">${t('thChangePctPred')}</th>
+      <th scope="col">${t('thChangePctBase')}</th>
+      <th scope="col">${t('thStatus')}</th>`;
+  } else {
+    els.resultsTable.classList.remove('has-post-bd');
+    els.resultsTheadRow.innerHTML = `
+      <th scope="col">${t('thParam')}</th>
+      <th scope="col">${t('thUnit')}</th>
+      <th scope="col">${t('thMeasured')}</th>
+      <th scope="col">${t('thPredicted')}</th>
+      <th scope="col">${t('thLLN')}</th>
+      <th scope="col">${t('thZscore')}</th>
+      <th scope="col">${t('thPctPred')}</th>
+      <th scope="col">${t('thStatus')}</th>`;
+  }
+}
 
 // --- Compute and render results ---
 function updateResults() {
@@ -39,56 +111,193 @@ function updateResults() {
 
   if (!isFinite(age) || age <= 0 || !isFinite(height) || height <= 0) {
     els.resultsBody.innerHTML = '';
+    renderInterpretation(null);
     return;
   }
 
+  autoCalcRatio('pre');
+  autoCalcRatio('post');
+
   const showAdvanced = !els.advancedInputs.classList.contains('hidden');
   const paramsToShow = showAdvanced ? PARAMS : CORE_PARAMS;
+  const postBD = hasAnyPostBD();
 
+  updateTableHeaders(postBD);
+
+  const interpData = {};
+  const dash = '<span class="muted">—</span>';
   let html = '';
+
   for (const p of paramsToShow) {
     const { predicted, sd, lln } = kainuCompute(age, height, sex, p);
     const dec = PARAM_DECIMALS[p] || 2;
     const isAdv = ADV_PARAMS.includes(p);
 
-    // Get measured value
-    const mInput = document.getElementById(`m-${p}`);
-    const measured = mInput ? parseFloat(mInput.value) : NaN;
-    const hasMeasured = isFinite(measured) && measured > 0;
+    const pre = getMeasured('pre', p);
+    const hasPre = isFinite(pre) && pre > 0;
 
-    let zStr = '', pctStr = '', statusHtml = '';
-    if (hasMeasured) {
-      const z = kainuZscore(age, height, sex, p, measured);
-      const pct = kainuPctPred(age, height, sex, p, measured);
-      zStr = z.toFixed(2);
-      pctStr = pct.toFixed(1);
+    let preZ = NaN, prePct = NaN;
+    if (hasPre) {
+      preZ = kainuZscore(age, height, sex, p, pre);
+      prePct = kainuPctPred(age, height, sex, p, pre);
+    }
 
-      if (measured < lln) {
+    // Store for interpretation
+    interpData[p] = { predicted, sd, lln, pre, preZ, prePct, hasPre };
+
+    // Status badge (based on pre-BD)
+    let statusHtml;
+    if (hasPre) {
+      if (pre < lln) {
         statusHtml = `<span class="status status-below">${t('statusBelowLLN')}</span>`;
-      } else if (Math.abs(z) > 1.0) {
+      } else if (Math.abs(preZ) > 1.0) {
         statusHtml = `<span class="status status-borderline">${t('statusBorderline')}</span>`;
       } else {
         statusHtml = `<span class="status status-normal">${t('statusNormal')}</span>`;
       }
     } else {
-      zStr = '<span class="muted">—</span>';
-      pctStr = '<span class="muted">—</span>';
       statusHtml = `<span class="status-na">${t('statusNA')}</span>`;
     }
 
     html += `<tr class="${isAdv ? 'row-advanced' : ''}">
       <td class="param-name">${t('param' + p)}</td>
       <td class="muted">${t(PARAM_UNITS[p])}</td>
-      <td class="num">${hasMeasured ? measured.toFixed(dec) : '<span class="muted">—</span>'}</td>
-      <td class="num">${predicted.toFixed(dec)}</td>
-      <td class="num">${lln.toFixed(dec)}</td>
-      <td class="num">${zStr}</td>
-      <td class="num">${pctStr}</td>
-      <td>${statusHtml}</td>
-    </tr>`;
+      <td class="num">${hasPre ? pre.toFixed(dec) : dash}</td>`;
+
+    if (postBD) {
+      const post = getMeasured('post', p);
+      const hasPost = isFinite(post) && post > 0;
+
+      let postStr = dash, absStr = dash, pctPredStr = dash, pctBaseStr = dash;
+
+      if (hasPost) {
+        postStr = post.toFixed(dec);
+
+        if (hasPre) {
+          const absChange = post - pre;
+          const pctPredChange = (absChange / predicted) * 100;
+          const pctBaseChange = (absChange / pre) * 100;
+
+          const sign = (v) => (v >= 0 ? '+' : '');
+          absStr = sign(absChange) + absChange.toFixed(dec);
+          pctPredStr = sign(pctPredChange) + pctPredChange.toFixed(1);
+          pctBaseStr = sign(pctBaseChange) + pctBaseChange.toFixed(1);
+
+          // Store BD data for FEV1 and FVC
+          if (p === 'FEV1' || p === 'FVC') {
+            interpData[p].post = post;
+            interpData[p].absChange = absChange;
+            interpData[p].pctPredChange = pctPredChange;
+            interpData[p].pctBaseChange = pctBaseChange;
+          }
+        }
+      }
+
+      html += `
+        <td class="num">${postStr}</td>
+        <td class="num">${predicted.toFixed(dec)}</td>
+        <td class="num">${lln.toFixed(dec)}</td>
+        <td class="num">${hasPre ? preZ.toFixed(2) : dash}</td>
+        <td class="num">${hasPre ? prePct.toFixed(1) : dash}</td>
+        <td class="num">${absStr}</td>
+        <td class="num">${pctPredStr}</td>
+        <td class="num">${pctBaseStr}</td>
+        <td>${statusHtml}</td>
+      </tr>`;
+    } else {
+      html += `
+        <td class="num">${predicted.toFixed(dec)}</td>
+        <td class="num">${lln.toFixed(dec)}</td>
+        <td class="num">${hasPre ? preZ.toFixed(2) : dash}</td>
+        <td class="num">${hasPre ? prePct.toFixed(1) : dash}</td>
+        <td>${statusHtml}</td>
+      </tr>`;
+    }
   }
 
   els.resultsBody.innerHTML = html;
+  renderInterpretation(interpData);
+}
+
+// --- Stanojevic 2022 Interpretation ---
+function renderInterpretation(data) {
+  const el = els.interpretationContent;
+  if (!el) return;
+  if (!data) { el.innerHTML = ''; return; }
+
+  const hasFEV1 = data.FEV1?.hasPre;
+  const hasFVC = data.FVC?.hasPre;
+  const hasRatio = data.FEV1FVC?.hasPre;
+
+  if (!hasFEV1 && !hasFVC && !hasRatio) {
+    el.innerHTML = `<p class="interp-note">${t('interpretHint')}</p>`;
+    return;
+  }
+
+  const items = [];
+
+  // Pattern classification
+  const isObstructed = hasRatio && data.FEV1FVC.pre < data.FEV1FVC.lln;
+  const fvcBelowLLN = hasFVC && data.FVC.pre < data.FVC.lln;
+
+  // Severity by FEV1 z-score
+  let severityKey = null;
+  if (hasFEV1) {
+    const z = data.FEV1.preZ;
+    if (z <= -4.0) severityKey = 'severe';
+    else if (z <= -2.5) severityKey = 'moderate';
+    else if (z <= -1.645) severityKey = 'mild';
+  }
+
+  const severityBadge = severityKey
+    ? ` <span class="severity-badge severity-${severityKey}">${t('severity' + capitalize(severityKey))}</span>`
+    : '';
+
+  if (isObstructed && fvcBelowLLN) {
+    items.push({ cls: 'interp-mixed', html: t('patternMixed') + severityBadge });
+    items.push({ cls: 'interp-note', html: t('noteMixedPattern') });
+  } else if (isObstructed) {
+    items.push({ cls: 'interp-obstruction', html: t('patternObstructive') + severityBadge });
+  } else if (fvcBelowLLN) {
+    items.push({ cls: 'interp-restriction', html: t('patternPossibleRestriction') });
+    items.push({ cls: 'interp-note', html: t('noteNeedsTLC') });
+  } else if (hasRatio && hasFVC) {
+    items.push({ cls: 'interp-normal', html: t('patternNormal') });
+  }
+
+  // BD response
+  const fev1HasBD = data.FEV1?.absChange !== undefined;
+  const fvcHasBD = data.FVC?.absChange !== undefined;
+
+  if (fev1HasBD || fvcHasBD) {
+    // 2022 criterion: change >= 10% of predicted
+    const bd2022 =
+      (fev1HasBD && data.FEV1.pctPredChange >= 10) ||
+      (fvcHasBD && data.FVC.pctPredChange >= 10);
+
+    // 2005 criterion: change >= 200 mL AND >= 12% from baseline
+    const bd2005 =
+      (fev1HasBD && data.FEV1.absChange >= 0.200 && data.FEV1.pctBaseChange >= 12) ||
+      (fvcHasBD && data.FVC.absChange >= 0.200 && data.FVC.pctBaseChange >= 12);
+
+    if (bd2022) {
+      items.push({ cls: 'interp-bd', html: `${t('bdSignificant2022')}<small>${t('bdCriteria2022')}</small>` });
+    }
+    if (bd2005) {
+      items.push({ cls: 'interp-bd', html: `${t('bdSignificant2005')}<small>${t('bdCriteria2005')}</small>` });
+    }
+    if (!bd2022 && !bd2005) {
+      items.push({ cls: 'interp-bd', html: t('bdNotSignificant') });
+    }
+  } else if (hasFEV1 || hasFVC) {
+    items.push({ cls: 'interp-note', html: t('bdNotAssessed') });
+  }
+
+  let html = items
+    .map((item) => `<div class="interpretation-item ${item.cls}">${item.html}</div>`)
+    .join('');
+  html += `<p class="interp-ref">${t('interpretRef')}</p>`;
+  el.innerHTML = html;
 }
 
 // --- i18n ---
@@ -106,19 +315,14 @@ function updateAllText() {
 
   document.getElementById('section-measured').textContent = t('sectionMeasured');
   document.getElementById('measured-hint').textContent = t('measuredHint');
+  document.getElementById('label-pre-bd').textContent = t('labelPreBD');
+  document.getElementById('label-post-bd').textContent = t('labelPostBD');
 
   const showAdvanced = !els.advancedInputs.classList.contains('hidden');
   els.btnAdvanced.textContent = showAdvanced ? t('btnHideAdvanced') : t('btnAdvanced');
 
   document.getElementById('section-results').textContent = t('sectionResults');
-  document.getElementById('th-param').textContent = t('thParam');
-  document.getElementById('th-unit').textContent = t('thUnit');
-  document.getElementById('th-measured').textContent = t('thMeasured');
-  document.getElementById('th-predicted').textContent = t('thPredicted');
-  document.getElementById('th-lln').textContent = t('thLLN');
-  document.getElementById('th-zscore').textContent = t('thZscore');
-  document.getElementById('th-pctpred').textContent = t('thPctPred');
-  document.getElementById('th-status').textContent = t('thStatus');
+  document.getElementById('section-interpretation').textContent = t('sectionInterpretation');
 
   document.getElementById('footer-ref').textContent = t('footerRef');
   document.getElementById('footer-note').textContent = t('footerNote');
@@ -149,12 +353,19 @@ function init() {
     r.addEventListener('change', updateResults),
   );
 
-  // Measured value inputs → live update
+  // Measured value inputs (pre and post) → live update
   PARAMS.forEach((p) => {
-    const el = document.getElementById(`m-${p}`);
-    if (el) {
-      ['input', 'change'].forEach((ev) => el.addEventListener(ev, updateResults));
-    }
+    ['pre', 'post'].forEach((phase) => {
+      const el = document.getElementById(`${phase}-${p}`);
+      if (el) {
+        ['input', 'change'].forEach((ev) =>
+          el.addEventListener(ev, () => {
+            if (p === 'FEV1' || p === 'FVC') autoCalcRatio(phase);
+            updateResults();
+          }),
+        );
+      }
+    });
   });
 
   // Advanced toggle

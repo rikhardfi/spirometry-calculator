@@ -13,15 +13,21 @@ import { COEFFICIENTS, SPLINES } from './kainu-data.js';
 
 /** All valid parameter names. */
 export const PARAMS = [
-  'FEV1', 'FVC', 'FEV1FVC', 'FEV6', 'FEV1FEV6',
-  'PEF', 'MMEF', 'MEF75', 'MEF50', 'MEF25',
+  'VC', 'FVC', 'FEV1', 'FEV1FVC', 'PEF',
+  'FEV6', 'FEV1FEV6', 'MMEF', 'MEF75', 'MEF50', 'MEF25',
 ];
 
 /** Core parameters (always shown). */
-export const CORE_PARAMS = ['FEV1', 'FVC', 'FEV1FVC', 'PEF'];
+export const CORE_PARAMS = ['VC', 'FVC', 'FEV1', 'FEV1FVC', 'PEF'];
 
 /** Advanced parameters (shown on toggle). */
 export const ADV_PARAMS = ['FEV6', 'FEV1FEV6', 'MMEF', 'MEF75', 'MEF50', 'MEF25'];
+
+/** VC uses FVC reference equations. */
+const PARAM_ALIAS = { VC: 'FVC' };
+function resolveParam(param) {
+  return PARAM_ALIAS[param] || param;
+}
 
 /** Get coefficients for a param + sex combination. */
 function getCoeffs(param, sex) {
@@ -70,10 +76,11 @@ function getSpline(param, sex, age) {
  * @returns {{ predicted: number, sd: number, lln: number }}
  */
 export function kainuCompute(age, heightCm, sex, param) {
-  const co = getCoeffs(param, sex);
+  const resolved = resolveParam(param);
+  const co = getCoeffs(resolved, sex);
   if (!co) return { predicted: NaN, sd: NaN, lln: NaN };
 
-  const sp = getSpline(param, sex, age);
+  const sp = getSpline(resolved, sex, age);
 
   const predicted = Math.exp(co.a0 + co.a1 * Math.log(heightCm) + co.a2 * Math.log(age) + sp.mspline);
   const sd = Math.exp(co.b0 + co.b1 * Math.log(age) + sp.sspline);
