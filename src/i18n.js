@@ -13,8 +13,8 @@ const translations = {
 
     sectionMeasured: '2. Measured values',
     measuredHint: 'Enter measured values to compute z-scores and % predicted. Leave empty to see reference values only.',
-    labelPreBD: 'Pre-BD',
-    labelPostBD: 'Post-BD',
+    labelPreBD: 'PRE',
+    labelPostBD: 'POST',
     btnAdvanced: 'Show advanced parameters',
     btnHideAdvanced: 'Hide advanced parameters',
 
@@ -22,8 +22,8 @@ const translations = {
     thParam: 'Parameter',
     thUnit: 'Unit',
     thMeasured: 'Measured',
-    thPreBD: 'Pre-BD',
-    thPostBD: 'Post-BD',
+    thPreBD: 'PRE',
+    thPostBD: 'POST',
     thPredicted: 'Predicted',
     thLLN: 'LLN',
     thZscore: 'Z-score',
@@ -109,8 +109,8 @@ const translations = {
 
     sectionMeasured: '2. Mitatut arvot',
     measuredHint: 'Syötä mitatut arvot z-pisteiden ja %-ennustettujen laskemiseksi. Jätä tyhjäksi nähdäksesi viitearvot.',
-    labelPreBD: 'Ennen BD',
-    labelPostBD: 'BD:n jälkeen',
+    labelPreBD: 'PRE',
+    labelPostBD: 'POST',
     btnAdvanced: 'Näytä lisäparametrit',
     btnHideAdvanced: 'Piilota lisäparametrit',
 
@@ -118,8 +118,8 @@ const translations = {
     thParam: 'Parametri',
     thUnit: 'Yksikkö',
     thMeasured: 'Mitattu',
-    thPreBD: 'Ennen BD',
-    thPostBD: 'BD:n jälkeen',
+    thPreBD: 'PRE',
+    thPostBD: 'POST',
     thPredicted: 'Ennustettu',
     thLLN: 'LLN',
     thZscore: 'Z-pistemäärä',
@@ -193,7 +193,7 @@ const translations = {
   },
 };
 
-let currentLang = 'en';
+let currentLang = 'fi';
 
 export function t(key) {
   return translations[currentLang]?.[key] ?? translations.en[key] ?? key;

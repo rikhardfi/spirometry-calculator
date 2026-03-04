@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="en">
+<html lang="fi">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -68,28 +68,28 @@
           <div id="core-inputs">
             <div class="bd-row">
               <label class="bd-param-label" for="pre-VC">VC (L)</label>
-              <input id="pre-VC" type="number" step="0.01" min="0" placeholder="e.g. 4.50">
-              <input id="post-VC" type="number" step="0.01" min="0">
+              <input id="pre-VC" type="number" step="0.01" min="0" placeholder="e.g. 4.50" tabindex="1">
+              <input id="post-VC" type="number" step="0.01" min="0" tabindex="6">
             </div>
             <div class="bd-row">
               <label class="bd-param-label" for="pre-FVC">FVC (L)</label>
-              <input id="pre-FVC" type="number" step="0.01" min="0" placeholder="e.g. 4.50">
-              <input id="post-FVC" type="number" step="0.01" min="0">
+              <input id="pre-FVC" type="number" step="0.01" min="0" placeholder="e.g. 4.50" tabindex="2">
+              <input id="post-FVC" type="number" step="0.01" min="0" tabindex="7">
             </div>
             <div class="bd-row">
               <label class="bd-param-label" for="pre-FEV1">FEV₁ (L)</label>
-              <input id="pre-FEV1" type="number" step="0.01" min="0" placeholder="e.g. 3.50">
-              <input id="post-FEV1" type="number" step="0.01" min="0">
+              <input id="pre-FEV1" type="number" step="0.01" min="0" placeholder="e.g. 3.50" tabindex="3">
+              <input id="post-FEV1" type="number" step="0.01" min="0" tabindex="8">
             </div>
             <div class="bd-row">
               <label class="bd-param-label" for="pre-FEV1FVC">FEV₁/FVC</label>
-              <input id="pre-FEV1FVC" type="number" step="0.001" min="0" max="1" placeholder="auto">
-              <input id="post-FEV1FVC" type="number" step="0.001" min="0" max="1" placeholder="auto">
+              <input id="pre-FEV1FVC" type="number" step="0.001" min="0" max="1" placeholder="auto" tabindex="4">
+              <input id="post-FEV1FVC" type="number" step="0.001" min="0" max="1" placeholder="auto" tabindex="9">
             </div>
             <div class="bd-row">
               <label class="bd-param-label" for="pre-PEF">PEF (L/s)</label>
-              <input id="pre-PEF" type="number" step="0.1" min="0" placeholder="e.g. 9.5">
-              <input id="post-PEF" type="number" step="0.1" min="0">
+              <input id="pre-PEF" type="number" step="0.1" min="0" placeholder="e.g. 9.5" tabindex="5">
+              <input id="post-PEF" type="number" step="0.1" min="0" tabindex="10">
             </div>
           </div>
 
@@ -98,33 +98,33 @@
           <div class="hidden" id="advanced-inputs">
             <div class="bd-row">
               <label class="bd-param-label" for="pre-FEV6">FEV₆ (L)</label>
-              <input id="pre-FEV6" type="number" step="0.01" min="0">
-              <input id="post-FEV6" type="number" step="0.01" min="0">
+              <input id="pre-FEV6" type="number" step="0.01" min="0" tabindex="11">
+              <input id="post-FEV6" type="number" step="0.01" min="0" tabindex="17">
             </div>
             <div class="bd-row">
               <label class="bd-param-label" for="pre-FEV1FEV6">FEV₁/FEV₆</label>
-              <input id="pre-FEV1FEV6" type="number" step="0.01" min="0" max="1">
-              <input id="post-FEV1FEV6" type="number" step="0.01" min="0" max="1">
+              <input id="pre-FEV1FEV6" type="number" step="0.01" min="0" max="1" tabindex="12">
+              <input id="post-FEV1FEV6" type="number" step="0.01" min="0" max="1" tabindex="18">
             </div>
             <div class="bd-row">
               <label class="bd-param-label" for="pre-MMEF">MMEF (L/s)</label>
-              <input id="pre-MMEF" type="number" step="0.01" min="0">
-              <input id="post-MMEF" type="number" step="0.01" min="0">
+              <input id="pre-MMEF" type="number" step="0.01" min="0" tabindex="13">
+              <input id="post-MMEF" type="number" step="0.01" min="0" tabindex="19">
             </div>
             <div class="bd-row">
               <label class="bd-param-label" for="pre-MEF75">MEF₇₅ (L/s)</label>
-              <input id="pre-MEF75" type="number" step="0.01" min="0">
-              <input id="post-MEF75" type="number" step="0.01" min="0">
+              <input id="pre-MEF75" type="number" step="0.01" min="0" tabindex="14">
+              <input id="post-MEF75" type="number" step="0.01" min="0" tabindex="20">
             </div>
             <div class="bd-row">
               <label class="bd-param-label" for="pre-MEF50">MEF₅₀ (L/s)</label>
-              <input id="pre-MEF50" type="number" step="0.01" min="0">
-              <input id="post-MEF50" type="number" step="0.01" min="0">
+              <input id="pre-MEF50" type="number" step="0.01" min="0" tabindex="15">
+              <input id="post-MEF50" type="number" step="0.01" min="0" tabindex="21">
             </div>
             <div class="bd-row">
               <label class="bd-param-label" for="pre-MEF25">MEF₂₅ (L/s)</label>
-              <input id="pre-MEF25" type="number" step="0.01" min="0">
-              <input id="post-MEF25" type="number" step="0.01" min="0">
+              <input id="pre-MEF25" type="number" step="0.01" min="0" tabindex="16">
+              <input id="post-MEF25" type="number" step="0.01" min="0" tabindex="22">
             </div>
           </div>
         </div>
