@@ -3,16 +3,16 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Spirometry Reference Calculator — Kainu et al. (2015)</title>
-    <meta name="description" content="Finnish spirometry reference values calculator with Stanojevic 2022 interpretation. Predicted values, LLN, z-scores, bronchodilator response." />
+    <title>Lung Function Reference Calculator — Kainu et al.</title>
+    <meta name="description" content="Finnish spirometry and diffusing capacity reference values calculator. Kainu et al. (2015, 2017). Predicted values, LLN, z-scores." />
   </head>
   <body>
     <div class="app" id="app">
       <!-- Header -->
       <header class="header">
         <div class="header-left">
-          <h1 id="app-title">Spirometry Reference Calculator</h1>
-          <p id="app-subtitle">Finnish reference values — Kainu et al. (2015)</p>
+          <h1 id="app-title">Lung Function Reference Calculator</h1>
+          <p id="app-subtitle">Finnish reference values — Kainu et al.</p>
         </div>
         <div class="header-actions">
           <button class="btn-icon" id="help-toggle" type="button" aria-label="Help" title="Help">?</button>
@@ -25,128 +25,214 @@
         <div id="help-content"></div>
       </div>
 
-      <!-- 1. Patient settings -->
-      <div class="card">
-        <h2 id="section-patient">1. Patient</h2>
-        <div class="grid">
-          <div class="field-group">
-            <label for="age" id="label-age">Age (years)</label>
-            <input id="age" type="number" min="18" max="100" step="1" value="50">
-          </div>
-          <div class="field-group">
-            <label for="height" id="label-height">Height (cm)</label>
-            <input id="height" type="number" min="100" max="220" step="1" value="175">
-          </div>
-          <div class="field-group">
-            <label id="label-sex">Sex</label>
-            <div class="radio-group">
-              <label class="radio-label">
-                <input type="radio" name="sex" value="1" checked>
-                <span id="label-male">Male</span>
-              </label>
-              <label class="radio-label">
-                <input type="radio" name="sex" value="2">
-                <span id="label-female">Female</span>
-              </label>
+      <!-- Tab Navigation -->
+      <div class="tab-nav" role="tablist">
+        <button class="tab-btn active" id="tab-spiro" role="tab" aria-selected="true" aria-controls="panel-spiro">Spirometry</button>
+        <button class="tab-btn" id="tab-dlco" role="tab" aria-selected="false" aria-controls="panel-dlco">Diffusing Capacity</button>
+      </div>
+
+      <!-- ======================== SPIROMETRY PANEL ======================== -->
+      <div class="tab-panel active" id="panel-spiro" role="tabpanel" aria-labelledby="tab-spiro">
+
+        <!-- 1. Patient settings -->
+        <div class="card">
+          <h2 id="section-patient">1. Patient</h2>
+          <div class="grid">
+            <div class="field-group">
+              <label for="age" id="label-age">Age (years)</label>
+              <input id="age" type="number" min="18" max="100" step="1" value="50">
+            </div>
+            <div class="field-group">
+              <label for="height" id="label-height">Height (cm)</label>
+              <input id="height" type="number" min="100" max="220" step="1" value="175">
+            </div>
+            <div class="field-group">
+              <label id="label-sex">Sex</label>
+              <div class="radio-group">
+                <label class="radio-label">
+                  <input type="radio" name="sex" value="1" checked>
+                  <span id="label-male">Male</span>
+                </label>
+                <label class="radio-label">
+                  <input type="radio" name="sex" value="2">
+                  <span id="label-female">Female</span>
+                </label>
+              </div>
             </div>
           </div>
         </div>
-      </div>
 
-      <!-- 2. Measured values -->
-      <div class="card">
-        <h2 id="section-measured">2. Measured values</h2>
-        <small id="measured-hint" class="hint">Enter measured values to compute z-scores and % predicted. Leave empty to see reference values only.</small>
+        <!-- 2. Measured values -->
+        <div class="card">
+          <h2 id="section-measured">2. Measured values</h2>
+          <small id="measured-hint" class="hint">Enter measured values to compute z-scores and % predicted. Leave empty to see reference values only.</small>
 
-        <div class="bd-columns">
-          <div class="bd-header">
-            <div class="bd-label-spacer"></div>
-            <div class="bd-col-header" id="label-pre-bd">Pre-BD</div>
-            <div class="bd-col-header" id="label-post-bd">Post-BD</div>
-          </div>
+          <div class="bd-columns">
+            <div class="bd-header">
+              <div class="bd-label-spacer"></div>
+              <div class="bd-col-header" id="label-pre-bd">Pre-BD</div>
+              <div class="bd-col-header" id="label-post-bd">Post-BD</div>
+            </div>
 
-          <div id="core-inputs">
-            <div class="bd-row">
-              <label class="bd-param-label" for="pre-VC">VC (L)</label>
-              <input id="pre-VC" type="number" step="0.01" min="0" placeholder="e.g. 4.50" tabindex="1">
-              <input id="post-VC" type="number" step="0.01" min="0" tabindex="6">
+            <div id="core-inputs">
+              <div class="bd-row">
+                <label class="bd-param-label" for="pre-VC">VC (L)</label>
+                <input id="pre-VC" type="number" step="0.01" min="0" placeholder="e.g. 4.50" tabindex="1">
+                <input id="post-VC" type="number" step="0.01" min="0" tabindex="6">
+              </div>
+              <div class="bd-row">
+                <label class="bd-param-label" for="pre-FVC">FVC (L)</label>
+                <input id="pre-FVC" type="number" step="0.01" min="0" placeholder="e.g. 4.50" tabindex="2">
+                <input id="post-FVC" type="number" step="0.01" min="0" tabindex="7">
+              </div>
+              <div class="bd-row">
+                <label class="bd-param-label" for="pre-FEV1">FEV₁ (L)</label>
+                <input id="pre-FEV1" type="number" step="0.01" min="0" placeholder="e.g. 3.50" tabindex="3">
+                <input id="post-FEV1" type="number" step="0.01" min="0" tabindex="8">
+              </div>
+              <div class="bd-row">
+                <label class="bd-param-label" for="pre-FEV1FVC">FEV₁/FVC</label>
+                <input id="pre-FEV1FVC" type="number" step="0.001" min="0" max="1" placeholder="auto" tabindex="4">
+                <input id="post-FEV1FVC" type="number" step="0.001" min="0" max="1" placeholder="auto" tabindex="9">
+              </div>
+              <div class="bd-row">
+                <label class="bd-param-label" for="pre-PEF">PEF (L/s)</label>
+                <input id="pre-PEF" type="number" step="0.1" min="0" placeholder="e.g. 9.5" tabindex="5">
+                <input id="post-PEF" type="number" step="0.1" min="0" tabindex="10">
+              </div>
             </div>
-            <div class="bd-row">
-              <label class="bd-param-label" for="pre-FVC">FVC (L)</label>
-              <input id="pre-FVC" type="number" step="0.01" min="0" placeholder="e.g. 4.50" tabindex="2">
-              <input id="post-FVC" type="number" step="0.01" min="0" tabindex="7">
-            </div>
-            <div class="bd-row">
-              <label class="bd-param-label" for="pre-FEV1">FEV₁ (L)</label>
-              <input id="pre-FEV1" type="number" step="0.01" min="0" placeholder="e.g. 3.50" tabindex="3">
-              <input id="post-FEV1" type="number" step="0.01" min="0" tabindex="8">
-            </div>
-            <div class="bd-row">
-              <label class="bd-param-label" for="pre-FEV1FVC">FEV₁/FVC</label>
-              <input id="pre-FEV1FVC" type="number" step="0.001" min="0" max="1" placeholder="auto" tabindex="4">
-              <input id="post-FEV1FVC" type="number" step="0.001" min="0" max="1" placeholder="auto" tabindex="9">
-            </div>
-            <div class="bd-row">
-              <label class="bd-param-label" for="pre-PEF">PEF (L/s)</label>
-              <input id="pre-PEF" type="number" step="0.1" min="0" placeholder="e.g. 9.5" tabindex="5">
-              <input id="post-PEF" type="number" step="0.1" min="0" tabindex="10">
-            </div>
-          </div>
 
-          <button type="button" class="btn-ghost" id="btn-advanced">Show advanced parameters</button>
+            <button type="button" class="btn-ghost" id="btn-advanced">Show advanced parameters</button>
 
-          <div class="hidden" id="advanced-inputs">
-            <div class="bd-row">
-              <label class="bd-param-label" for="pre-FEV6">FEV₆ (L)</label>
-              <input id="pre-FEV6" type="number" step="0.01" min="0" tabindex="11">
-              <input id="post-FEV6" type="number" step="0.01" min="0" tabindex="17">
-            </div>
-            <div class="bd-row">
-              <label class="bd-param-label" for="pre-FEV1FEV6">FEV₁/FEV₆</label>
-              <input id="pre-FEV1FEV6" type="number" step="0.01" min="0" max="1" tabindex="12">
-              <input id="post-FEV1FEV6" type="number" step="0.01" min="0" max="1" tabindex="18">
-            </div>
-            <div class="bd-row">
-              <label class="bd-param-label" for="pre-MMEF">MMEF (L/s)</label>
-              <input id="pre-MMEF" type="number" step="0.01" min="0" tabindex="13">
-              <input id="post-MMEF" type="number" step="0.01" min="0" tabindex="19">
-            </div>
-            <div class="bd-row">
-              <label class="bd-param-label" for="pre-MEF75">MEF₇₅ (L/s)</label>
-              <input id="pre-MEF75" type="number" step="0.01" min="0" tabindex="14">
-              <input id="post-MEF75" type="number" step="0.01" min="0" tabindex="20">
-            </div>
-            <div class="bd-row">
-              <label class="bd-param-label" for="pre-MEF50">MEF₅₀ (L/s)</label>
-              <input id="pre-MEF50" type="number" step="0.01" min="0" tabindex="15">
-              <input id="post-MEF50" type="number" step="0.01" min="0" tabindex="21">
-            </div>
-            <div class="bd-row">
-              <label class="bd-param-label" for="pre-MEF25">MEF₂₅ (L/s)</label>
-              <input id="pre-MEF25" type="number" step="0.01" min="0" tabindex="16">
-              <input id="post-MEF25" type="number" step="0.01" min="0" tabindex="22">
+            <div class="hidden" id="advanced-inputs">
+              <div class="bd-row">
+                <label class="bd-param-label" for="pre-FEV6">FEV₆ (L)</label>
+                <input id="pre-FEV6" type="number" step="0.01" min="0" tabindex="11">
+                <input id="post-FEV6" type="number" step="0.01" min="0" tabindex="17">
+              </div>
+              <div class="bd-row">
+                <label class="bd-param-label" for="pre-FEV1FEV6">FEV₁/FEV₆</label>
+                <input id="pre-FEV1FEV6" type="number" step="0.01" min="0" max="1" tabindex="12">
+                <input id="post-FEV1FEV6" type="number" step="0.01" min="0" max="1" tabindex="18">
+              </div>
+              <div class="bd-row">
+                <label class="bd-param-label" for="pre-MMEF">MMEF (L/s)</label>
+                <input id="pre-MMEF" type="number" step="0.01" min="0" tabindex="13">
+                <input id="post-MMEF" type="number" step="0.01" min="0" tabindex="19">
+              </div>
+              <div class="bd-row">
+                <label class="bd-param-label" for="pre-MEF75">MEF₇₅ (L/s)</label>
+                <input id="pre-MEF75" type="number" step="0.01" min="0" tabindex="14">
+                <input id="post-MEF75" type="number" step="0.01" min="0" tabindex="20">
+              </div>
+              <div class="bd-row">
+                <label class="bd-param-label" for="pre-MEF50">MEF₅₀ (L/s)</label>
+                <input id="pre-MEF50" type="number" step="0.01" min="0" tabindex="15">
+                <input id="post-MEF50" type="number" step="0.01" min="0" tabindex="21">
+              </div>
+              <div class="bd-row">
+                <label class="bd-param-label" for="pre-MEF25">MEF₂₅ (L/s)</label>
+                <input id="pre-MEF25" type="number" step="0.01" min="0" tabindex="16">
+                <input id="post-MEF25" type="number" step="0.01" min="0" tabindex="22">
+              </div>
             </div>
           </div>
         </div>
-      </div>
 
-      <!-- 3. Results -->
-      <div class="card">
-        <h2 id="section-results">3. Reference values</h2>
-        <div class="table-wrapper">
-          <table class="results-table" id="results-table">
-            <thead>
-              <tr id="results-thead-row"></tr>
-            </thead>
-            <tbody id="results-body"></tbody>
-          </table>
+        <!-- 3. Results -->
+        <div class="card">
+          <h2 id="section-results">3. Reference values</h2>
+          <div class="table-wrapper">
+            <table class="results-table" id="results-table">
+              <thead>
+                <tr id="results-thead-row"></tr>
+              </thead>
+              <tbody id="results-body"></tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- 4. Interpretation -->
+        <div class="card">
+          <h2 id="section-interpretation">4. Interpretation</h2>
+          <div id="interpretation-content"></div>
         </div>
       </div>
 
-      <!-- 4. Interpretation -->
-      <div class="card">
-        <h2 id="section-interpretation">4. Interpretation</h2>
-        <div id="interpretation-content"></div>
+      <!-- ======================== DLCO PANEL ======================== -->
+      <div class="tab-panel" id="panel-dlco" role="tabpanel" aria-labelledby="tab-dlco">
+
+        <!-- 1. Patient settings -->
+        <div class="card">
+          <h2 id="dlco-section-patient">1. Patient</h2>
+          <div class="grid">
+            <div class="field-group">
+              <label for="dlco-age" id="dlco-label-age">Age (years)</label>
+              <input id="dlco-age" type="number" min="18" max="83" step="1" value="50">
+            </div>
+            <div class="field-group">
+              <label for="dlco-height" id="dlco-label-height">Height (cm)</label>
+              <input id="dlco-height" type="number" min="140" max="220" step="1" value="175">
+            </div>
+            <div class="field-group">
+              <label for="dlco-weight" id="dlco-label-weight">Weight (kg)</label>
+              <input id="dlco-weight" type="number" min="40" max="200" step="0.1" value="70">
+            </div>
+            <div class="field-group">
+              <label id="dlco-label-sex">Sex</label>
+              <div class="radio-group">
+                <label class="radio-label">
+                  <input type="radio" name="dlco-sex" value="1" checked>
+                  <span id="dlco-label-male">Male</span>
+                </label>
+                <label class="radio-label">
+                  <input type="radio" name="dlco-sex" value="2">
+                  <span id="dlco-label-female">Female</span>
+                </label>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- 2. Measured values -->
+        <div class="card">
+          <h2 id="dlco-section-measured">2. Measured values</h2>
+          <small id="dlco-measured-hint" class="hint">Enter measured values to compute z-scores and % predicted. Leave empty to see reference values only.</small>
+
+          <div class="dlco-inputs">
+            <div class="dlco-input-row">
+              <label class="dlco-param-label" for="dlco-meas-DLCO" id="dlco-input-label-DLCO">DL<sub>CO</sub> (mmol/min/kPa)</label>
+              <input id="dlco-meas-DLCO" type="number" step="0.01" min="0" placeholder="e.g. 10.5">
+            </div>
+            <div class="dlco-input-row">
+              <label class="dlco-param-label" for="dlco-meas-DLCOVA" id="dlco-input-label-DLCOVA">DL<sub>CO</sub>/V<sub>A</sub> (mmol/min/kPa/L)</label>
+              <input id="dlco-meas-DLCOVA" type="number" step="0.01" min="0" placeholder="e.g. 1.50">
+            </div>
+            <div class="dlco-input-row">
+              <label class="dlco-param-label" for="dlco-meas-VA" id="dlco-input-label-VA">V<sub>A</sub> (L)</label>
+              <input id="dlco-meas-VA" type="number" step="0.01" min="0" placeholder="e.g. 7.0">
+            </div>
+          </div>
+        </div>
+
+        <!-- 3. Results -->
+        <div class="card">
+          <h2 id="dlco-section-results">3. Reference values</h2>
+          <div class="table-wrapper">
+            <table class="results-table" id="dlco-results-table">
+              <thead>
+                <tr id="dlco-results-thead-row"></tr>
+              </thead>
+              <tbody id="dlco-results-body"></tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- 4. Interpretation -->
+        <div class="card">
+          <h2 id="dlco-section-interpretation">4. Interpretation</h2>
+          <div id="dlco-interpretation-content"></div>
+        </div>
       </div>
 
       <!-- Footer -->

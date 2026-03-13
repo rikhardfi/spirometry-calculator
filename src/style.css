@@ -298,6 +298,77 @@ body {
 .severity-moderate { background: #ffecd2; color: #e65100; }
 .severity-severe { background: #fde8e8; color: var(--red); }
 
+/* Tab navigation */
+.tab-nav {
+  display: flex;
+  gap: 0;
+  margin-bottom: 0.75rem;
+  border-bottom: 2px solid var(--border);
+}
+.tab-btn {
+  padding: 0.6rem 1.2rem;
+  border: none;
+  background: none;
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: var(--text-muted);
+  cursor: pointer;
+  border-bottom: 2px solid transparent;
+  margin-bottom: -2px;
+  transition: color 0.15s, border-color 0.15s;
+}
+.tab-btn:hover { color: var(--primary); }
+.tab-btn.active {
+  color: var(--primary);
+  border-bottom-color: var(--primary);
+}
+
+/* Tab panels */
+.tab-panel { display: none; }
+.tab-panel.active { display: block; }
+
+/* DLCO input layout */
+.dlco-inputs { max-width: 400px; }
+.dlco-input-row {
+  display: grid;
+  grid-template-columns: 200px 1fr;
+  gap: 0.5rem;
+  margin-bottom: 0.4rem;
+  align-items: center;
+}
+.dlco-param-label {
+  font-size: 0.82rem;
+  font-weight: 500;
+  color: var(--text);
+}
+.dlco-input-row input[type="number"] {
+  padding: 0.45rem 0.5rem;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  font-size: 0.9rem;
+  width: 100%;
+  transition: border-color 0.15s;
+}
+.dlco-input-row input:focus {
+  outline: none;
+  border-color: var(--accent);
+  box-shadow: 0 0 0 2px rgba(66, 133, 244, 0.15);
+}
+
+/* DLCO severity interpretation */
+.interp-dlco-normal {
+  background: #e6f4ea;
+  border-left: 3px solid var(--green);
+}
+.interp-dlco-mild {
+  background: #fff8e1;
+  border-left: 3px solid #b8860b;
+}
+.interp-dlco-severe {
+  background: #fde8e8;
+  border-left: 3px solid var(--red);
+}
+
 /* Footer */
 .footer {
   padding: 1rem 0;
@@ -320,6 +391,8 @@ body {
   .bd-row { grid-template-columns: 80px 1fr 1fr; }
   .bd-param-label { font-size: 0.75rem; }
   .bd-row input[type="number"] { font-size: 0.82rem; padding: 0.4rem; }
+  .dlco-input-row { grid-template-columns: 1fr; }
+  .tab-btn { padding: 0.5rem 0.8rem; font-size: 0.82rem; }
 }
 @media (max-width: 400px) {
   .grid { grid-template-columns: 1fr; }

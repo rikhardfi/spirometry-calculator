@@ -1,5 +1,6 @@
 import './style.css';
 import { kainuCompute, kainuZscore, kainuPctPred, CORE_PARAMS, ADV_PARAMS, PARAMS } from './kainu.js';
+import { dlcoCompute, dlcoZscore, dlcoPctPred, DLCO_PARAMS } from './dlco.js';
 import { t, toggleLanguage } from './i18n.js';
 
 // --- DOM refs ---
@@ -16,7 +17,43 @@ const els = {
   btnAdvanced: document.getElementById('btn-advanced'),
   advancedInputs: document.getElementById('advanced-inputs'),
   interpretationContent: document.getElementById('interpretation-content'),
+  // Tabs
+  tabSpiro: document.getElementById('tab-spiro'),
+  tabDlco: document.getElementById('tab-dlco'),
+  panelSpiro: document.getElementById('panel-spiro'),
+  panelDlco: document.getElementById('panel-dlco'),
+  // DLCO
+  dlcoAge: document.getElementById('dlco-age'),
+  dlcoHeight: document.getElementById('dlco-height'),
+  dlcoWeight: document.getElementById('dlco-weight'),
+  dlcoResultsBody: document.getElementById('dlco-results-body'),
+  dlcoResultsTheadRow: document.getElementById('dlco-results-thead-row'),
+  dlcoInterpretationContent: document.getElementById('dlco-interpretation-content'),
 };
+
+let activeTab = 'spiro';
+
+// ======================== TAB SWITCHING ========================
+
+function switchTab(tab) {
+  activeTab = tab;
+  els.tabSpiro.classList.toggle('active', tab === 'spiro');
+  els.tabDlco.classList.toggle('active', tab === 'dlco');
+  els.tabSpiro.setAttribute('aria-selected', tab === 'spiro');
+  els.tabDlco.setAttribute('aria-selected', tab === 'dlco');
+  els.panelSpiro.classList.toggle('active', tab === 'spiro');
+  els.panelDlco.classList.toggle('active', tab === 'dlco');
+
+  // Update footer for active tab
+  updateFooter();
+}
+
+function updateFooter() {
+  const ref = activeTab === 'dlco' ? t('dlcoFooterRef') : t('footerRef');
+  document.getElementById('footer-ref').textContent = ref;
+}
+
+// ======================== SPIROMETRY (unchanged) ========================
 
 function getSex() {
   const checked = document.querySelector('input[name="sex"]:checked');
@@ -34,7 +71,6 @@ const PARAM_DECIMALS = {
   PEF: 1, MMEF: 2, MEF75: 2, MEF50: 2, MEF25: 2,
 };
 
-// --- Auto-calculate FEV1/FVC ---
 function autoCalcRatio(phase) {
   const fev1El = document.getElementById(`${phase}-FEV1`);
   const fvcEl = document.getElementById(`${phase}-FVC`);
@@ -55,7 +91,6 @@ function autoCalcRatio(phase) {
   }
 }
 
-// --- Helpers ---
 function getMeasured(phase, param) {
   const el = document.getElementById(`${phase}-${param}`);
   return el ? parseFloat(el.value) : NaN;
@@ -72,7 +107,6 @@ function capitalize(s) {
   return s.charAt(0).toUpperCase() + s.slice(1);
 }
 
-// --- Dynamic table headers ---
 function updateTableHeaders(postBD) {
   if (postBD) {
     els.resultsTable.classList.add('has-post-bd');
@@ -103,7 +137,6 @@ function updateTableHeaders(postBD) {
   }
 }
 
-// --- Compute and render results ---
 function updateResults() {
   const age = parseFloat(els.age.value);
   const height = parseFloat(els.height.value);
@@ -142,10 +175,8 @@ function updateResults() {
       prePct = kainuPctPred(age, height, sex, p, pre);
     }
 
-    // Store for interpretation
     interpData[p] = { predicted, sd, lln, pre, preZ, prePct, hasPre };
 
-    // Status badge (based on pre-BD)
     let statusHtml;
     if (hasPre) {
       if (pre < lln) {
@@ -183,7 +214,6 @@ function updateResults() {
           pctPredStr = sign(pctPredChange) + pctPredChange.toFixed(1);
           pctBaseStr = sign(pctBaseChange) + pctBaseChange.toFixed(1);
 
-          // Store BD data for FEV1 and FVC
           if (p === 'FEV1' || p === 'FVC') {
             interpData[p].post = post;
             interpData[p].absChange = absChange;
@@ -219,7 +249,6 @@ function updateResults() {
   renderInterpretation(interpData);
 }
 
-// --- Stanojevic 2022 Interpretation ---
 function renderInterpretation(data) {
   const el = els.interpretationContent;
   if (!el) return;
@@ -236,11 +265,9 @@ function renderInterpretation(data) {
 
   const items = [];
 
-  // Pattern classification
   const isObstructed = hasRatio && data.FEV1FVC.pre < data.FEV1FVC.lln;
   const fvcBelowLLN = hasFVC && data.FVC.pre < data.FVC.lln;
 
-  // Severity by FEV1 z-score
   let severityKey = null;
   if (hasFEV1) {
     const z = data.FEV1.preZ;
@@ -265,17 +292,14 @@ function renderInterpretation(data) {
     items.push({ cls: 'interp-normal', html: t('patternNormal') });
   }
 
-  // BD response
   const fev1HasBD = data.FEV1?.absChange !== undefined;
   const fvcHasBD = data.FVC?.absChange !== undefined;
 
   if (fev1HasBD || fvcHasBD) {
-    // 2022 criterion: change >= 10% of predicted
     const bd2022 =
       (fev1HasBD && data.FEV1.pctPredChange >= 10) ||
       (fvcHasBD && data.FVC.pctPredChange >= 10);
 
-    // 2005 criterion: change >= 200 mL AND >= 12% from baseline
     const bd2005 =
       (fev1HasBD && data.FEV1.absChange >= 0.200 && data.FEV1.pctBaseChange >= 12) ||
       (fvcHasBD && data.FVC.absChange >= 0.200 && data.FVC.pctBaseChange >= 12);
@@ -300,12 +324,156 @@ function renderInterpretation(data) {
   el.innerHTML = html;
 }
 
-// --- i18n ---
+// ======================== DLCO ========================
+
+function getDlcoSex() {
+  const checked = document.querySelector('input[name="dlco-sex"]:checked');
+  return checked ? parseInt(checked.value, 10) : 1;
+}
+
+const DLCO_PARAM_LABELS = { DLCO: 'dlcoParamDLCO', DLCOVA: 'dlcoParamDLCOVA', VA: 'dlcoParamVA' };
+const DLCO_PARAM_UNITS = { DLCO: 'dlcoUnitDLCO', DLCOVA: 'dlcoUnitDLCOVA', VA: 'dlcoUnitVA' };
+const DLCO_PARAM_DECIMALS = { DLCO: 2, DLCOVA: 2, VA: 2 };
+
+function updateDlcoResults() {
+  const age = parseFloat(els.dlcoAge.value);
+  const heightCm = parseFloat(els.dlcoHeight.value);
+  const weightKg = parseFloat(els.dlcoWeight.value);
+  const sex = getDlcoSex();
+
+  if (!isFinite(age) || age <= 0 || !isFinite(heightCm) || heightCm <= 0 || !isFinite(weightKg) || weightKg <= 0) {
+    els.dlcoResultsBody.innerHTML = '';
+    renderDlcoInterpretation(null);
+    return;
+  }
+
+  // Table headers
+  els.dlcoResultsTheadRow.innerHTML = `
+    <th scope="col">${t('thParam')}</th>
+    <th scope="col">${t('thUnit')}</th>
+    <th scope="col">${t('thMeasured')}</th>
+    <th scope="col">${t('thPredicted')}</th>
+    <th scope="col">${t('thLLN')}</th>
+    <th scope="col">${t('thZscore')}</th>
+    <th scope="col">${t('thPctPred')}</th>
+    <th scope="col">${t('thStatus')}</th>`;
+
+  const dash = '<span class="muted">—</span>';
+  let html = '';
+  const interpData = {};
+
+  for (const p of DLCO_PARAMS) {
+    const { predicted, sd, lln } = dlcoCompute(age, heightCm, weightKg, sex, p);
+    const dec = DLCO_PARAM_DECIMALS[p];
+
+    const measEl = document.getElementById(`dlco-meas-${p}`);
+    const meas = measEl ? parseFloat(measEl.value) : NaN;
+    const hasMeas = isFinite(meas) && meas > 0;
+
+    let zScore = NaN, pctPred = NaN;
+    if (hasMeas) {
+      zScore = dlcoZscore(age, heightCm, weightKg, sex, p, meas);
+      pctPred = dlcoPctPred(age, heightCm, weightKg, sex, p, meas);
+    }
+
+    interpData[p] = { predicted, sd, lln, meas, zScore, pctPred, hasMeas };
+
+    let statusHtml;
+    if (hasMeas) {
+      if (meas < lln) {
+        statusHtml = `<span class="status status-below">${t('statusBelowLLN')}</span>`;
+      } else if (Math.abs(zScore) > 1.0) {
+        statusHtml = `<span class="status status-borderline">${t('statusBorderline')}</span>`;
+      } else {
+        statusHtml = `<span class="status status-normal">${t('statusNormal')}</span>`;
+      }
+    } else {
+      statusHtml = `<span class="status-na">${t('statusNA')}</span>`;
+    }
+
+    html += `<tr>
+      <td class="param-name">${t(DLCO_PARAM_LABELS[p])}</td>
+      <td class="muted">${t(DLCO_PARAM_UNITS[p])}</td>
+      <td class="num">${hasMeas ? meas.toFixed(dec) : dash}</td>
+      <td class="num">${predicted.toFixed(dec)}</td>
+      <td class="num">${lln.toFixed(dec)}</td>
+      <td class="num">${hasMeas ? zScore.toFixed(2) : dash}</td>
+      <td class="num">${hasMeas ? pctPred.toFixed(1) : dash}</td>
+      <td>${statusHtml}</td>
+    </tr>`;
+  }
+
+  els.dlcoResultsBody.innerHTML = html;
+  renderDlcoInterpretation(interpData);
+}
+
+/**
+ * DLCO interpretation based on Timonen et al. 2021 (Lääkärilehti):
+ *   Normal: z >= -1.65
+ *   Mildly reduced: -3.0 <= z < -1.65
+ *   Clearly reduced: z < -3.0
+ */
+function renderDlcoInterpretation(data) {
+  const el = els.dlcoInterpretationContent;
+  if (!el) return;
+  if (!data) { el.innerHTML = ''; return; }
+
+  const dlco = data.DLCO;
+  if (!dlco?.hasMeas) {
+    el.innerHTML = `<p class="interp-note">${t('dlcoInterpretHint')}</p>`;
+    return;
+  }
+
+  const items = [];
+  const z = dlco.zScore;
+
+  if (z >= -1.65) {
+    items.push({ cls: 'interp-dlco-normal', html: t('dlcoInterpNormal') });
+  } else if (z >= -3.0) {
+    items.push({
+      cls: 'interp-dlco-mild',
+      html: `${t('dlcoInterpMild')} <span class="severity-badge severity-mild">z = ${z.toFixed(2)}</span>`,
+    });
+  } else {
+    items.push({
+      cls: 'interp-dlco-severe',
+      html: `${t('dlcoInterpSevere')} <span class="severity-badge severity-severe">z = ${z.toFixed(2)}</span>`,
+    });
+  }
+
+  // Also interpret DLCO/VA if available
+  const dlcova = data.DLCOVA;
+  if (dlcova?.hasMeas) {
+    const zva = dlcova.zScore;
+    if (zva < -1.65) {
+      const sevCls = zva < -3.0 ? 'severity-severe' : 'severity-mild';
+      const label = zva < -3.0 ? t('dlcoInterpSevere') : t('dlcoInterpMild');
+      items.push({
+        cls: zva < -3.0 ? 'interp-dlco-severe' : 'interp-dlco-mild',
+        html: `${t('dlcoParamDLCOVA')}: ${label.toLowerCase()} <span class="severity-badge ${sevCls}">z = ${zva.toFixed(2)}</span>`,
+      });
+    }
+  }
+
+  let html = items
+    .map((item) => `<div class="interpretation-item ${item.cls}">${item.html}</div>`)
+    .join('');
+  html += `<p class="interp-ref">${t('dlcoInterpRef')}</p>`;
+  el.innerHTML = html;
+}
+
+// ======================== i18n ========================
+
 function updateAllText() {
   document.getElementById('app-title').textContent = t('title');
   document.getElementById('app-subtitle').textContent = t('subtitle');
   els.langToggle.textContent = t('languageToggle');
 
+  // Tab labels
+  els.tabSpiro.textContent = t('tabSpiro');
+  els.tabDlco.textContent = t('tabDlco');
+
+  // Spirometry panel
   document.getElementById('section-patient').textContent = t('sectionPatient');
   document.getElementById('label-age').textContent = t('labelAge');
   document.getElementById('label-height').textContent = t('labelHeight');
@@ -324,12 +492,27 @@ function updateAllText() {
   document.getElementById('section-results').textContent = t('sectionResults');
   document.getElementById('section-interpretation').textContent = t('sectionInterpretation');
 
-  document.getElementById('footer-ref').textContent = t('footerRef');
+  // DLCO panel
+  document.getElementById('dlco-section-patient').textContent = t('sectionPatient');
+  document.getElementById('dlco-label-age').textContent = t('labelAge');
+  document.getElementById('dlco-label-height').textContent = t('labelHeight');
+  document.getElementById('dlco-label-weight').textContent = t('dlcoLabelWeight');
+  document.getElementById('dlco-label-sex').textContent = t('labelSex');
+  document.getElementById('dlco-label-male').textContent = t('sexMale');
+  document.getElementById('dlco-label-female').textContent = t('sexFemale');
+  document.getElementById('dlco-section-measured').textContent = t('sectionMeasured');
+  document.getElementById('dlco-measured-hint').textContent = t('dlcoMeasuredHint');
+  document.getElementById('dlco-section-results').textContent = t('sectionResults');
+  document.getElementById('dlco-section-interpretation').textContent = t('sectionInterpretation');
+
+  // Footer
+  updateFooter();
   document.getElementById('footer-note').textContent = t('footerNote');
   document.getElementById('footer-rpkg').textContent = t('footerRpkg');
 
   renderHelp();
   updateResults();
+  updateDlcoResults();
 }
 
 function renderHelp() {
@@ -342,9 +525,14 @@ function renderHelp() {
   els.helpContent.innerHTML = html;
 }
 
-// --- Events ---
+// ======================== EVENTS ========================
+
 function init() {
-  // Patient inputs → live update
+  // Tab switching
+  els.tabSpiro.addEventListener('click', () => switchTab('spiro'));
+  els.tabDlco.addEventListener('click', () => switchTab('dlco'));
+
+  // Spirometry: patient inputs → live update
   ['input', 'change'].forEach((ev) => {
     els.age.addEventListener(ev, updateResults);
     els.height.addEventListener(ev, updateResults);
@@ -353,7 +541,7 @@ function init() {
     r.addEventListener('change', updateResults),
   );
 
-  // Measured value inputs (pre and post) → live update
+  // Spirometry: measured value inputs
   PARAMS.forEach((p) => {
     ['pre', 'post'].forEach((phase) => {
       const el = document.getElementById(`${phase}-${p}`);
@@ -368,7 +556,7 @@ function init() {
     });
   });
 
-  // Advanced toggle
+  // Spirometry: advanced toggle
   els.btnAdvanced.addEventListener('click', () => {
     els.advancedInputs.classList.toggle('hidden');
     const showAdvanced = !els.advancedInputs.classList.contains('hidden');
@@ -376,11 +564,33 @@ function init() {
     updateResults();
   });
 
+  // DLCO: patient inputs → live update
+  ['input', 'change'].forEach((ev) => {
+    els.dlcoAge.addEventListener(ev, updateDlcoResults);
+    els.dlcoHeight.addEventListener(ev, updateDlcoResults);
+    els.dlcoWeight.addEventListener(ev, updateDlcoResults);
+  });
+  document.querySelectorAll('input[name="dlco-sex"]').forEach((r) =>
+    r.addEventListener('change', updateDlcoResults),
+  );
+
+  // DLCO: measured value inputs
+  DLCO_PARAMS.forEach((p) => {
+    const el = document.getElementById(`dlco-meas-${p}`);
+    if (el) {
+      ['input', 'change'].forEach((ev) =>
+        el.addEventListener(ev, updateDlcoResults),
+      );
+    }
+  });
+
   // Language toggle
   els.langToggle.addEventListener('click', () => {
     const lang = toggleLanguage();
     document.documentElement.lang = lang;
-    document.title = t('title') + ' — Kainu et al. (2015)';
+    document.title = activeTab === 'dlco'
+      ? t('dlcoTitle') + ' — Kainu et al. (2017)'
+      : t('title') + ' — Kainu et al. (2015)';
     updateAllText();
   });
 

@@ -94,6 +94,28 @@ const translations = {
       'Interpretation follows ERS/ATS 2022 technical standard. Severity is graded by FEV₁ z-score.',
       'BD response: 2022 criterion (≥10% of predicted) and 2005 criterion (≥200 mL + ≥12% from baseline) are both shown.',
     ],
+
+    // Tab navigation
+    tabSpiro: 'Spirometry',
+    tabDlco: 'Diffusing Capacity',
+
+    // DLCO-specific
+    dlcoTitle: 'Diffusing Capacity Reference Calculator',
+    dlcoSubtitle: 'Finnish reference values — Kainu et al. (2017)',
+    dlcoLabelWeight: 'Weight (kg)',
+    dlcoMeasuredHint: 'Enter measured values to compute z-scores and % predicted. Leave empty to see reference values only.',
+    dlcoParamDLCO: 'DL\u1d04\u1d0f',
+    dlcoParamDLCOVA: 'DL\u1d04\u1d0f/V\u1d00',
+    dlcoParamVA: 'V\u1d00',
+    dlcoUnitDLCO: 'mmol/min/kPa',
+    dlcoUnitDLCOVA: 'mmol/min/kPa/L',
+    dlcoUnitVA: 'L',
+    dlcoInterpretHint: 'Enter at least DL\u1d04\u1d0f to see interpretation.',
+    dlcoInterpNormal: 'Normal diffusing capacity',
+    dlcoInterpMild: 'Mildly reduced diffusing capacity',
+    dlcoInterpSevere: 'Clearly reduced diffusing capacity',
+    dlcoInterpRef: 'Interpretation: Timonen et al. Suom Lääkärilehti. 2021;76(24-32):1566-1568.',
+    dlcoFooterRef: 'Kainu A et al. Reference values for pulmonary diffusing capacity for adult native Finns. Scand J Clin Lab Invest. 2017;77(2):135-142.',
   },
   fi: {
     title: 'Spirometrian viitearvot',
@@ -190,6 +212,28 @@ const translations = {
       'Tulkinta noudattaa ERS/ATS 2022 -teknistä standardia. Vaikeusaste arvioidaan FEV₁:n z-pisteiden perusteella.',
       'BD-vaste: 2022-kriteeri (≥10 % ennustetusta) ja 2005-kriteeri (≥200 ml + ≥12 % lähtöarvosta) molemmat näytetään.',
     ],
+
+    // Tab navigation
+    tabSpiro: 'Spirometria',
+    tabDlco: 'Diffuusiokapasiteetti',
+
+    // DLCO-specific
+    dlcoTitle: 'Diffuusiokapasiteetin viitearvot',
+    dlcoSubtitle: 'Suomalaiset viitearvot — Kainu ym. (2017)',
+    dlcoLabelWeight: 'Paino (kg)',
+    dlcoMeasuredHint: 'Syötä mitatut arvot z-pisteiden ja %-ennustettujen laskemiseksi. Jätä tyhjäksi nähdäksesi viitearvot.',
+    dlcoParamDLCO: 'DL\u1d04\u1d0f',
+    dlcoParamDLCOVA: 'DL\u1d04\u1d0f/V\u1d00',
+    dlcoParamVA: 'V\u1d00',
+    dlcoUnitDLCO: 'mmol/min/kPa',
+    dlcoUnitDLCOVA: 'mmol/min/kPa/L',
+    dlcoUnitVA: 'L',
+    dlcoInterpretHint: 'Syötä vähintään DL\u1d04\u1d0f nähdäksesi tulkinnan.',
+    dlcoInterpNormal: 'Normaali diffuusiokapasiteetti',
+    dlcoInterpMild: 'Lievästi pienentynyt diffuusiokapasiteetti',
+    dlcoInterpSevere: 'Selvästi pienentynyt diffuusiokapasiteetti',
+    dlcoInterpRef: 'Tulkinta: Timonen ym. Suom Lääkärilehti. 2021;76(24-32):1566-1568.',
+    dlcoFooterRef: 'Kainu A ym. Reference values for pulmonary diffusing capacity for adult native Finns. Scand J Clin Lab Invest. 2017;77(2):135-142.',
   },
 };
 
