@@ -46,8 +46,8 @@
               <label for="height" id="label-height">Height (cm)</label>
               <input id="height" type="number" min="100" max="220" step="1" value="175">
             </div>
-            <div class="field-group">
-              <label id="label-sex">Sex</label>
+            <fieldset class="field-group">
+              <legend id="label-sex">Sex</legend>
               <div class="radio-group">
                 <label class="radio-label">
                   <input type="radio" name="sex" value="1" checked>
@@ -58,7 +58,7 @@
                   <span id="label-female">Female</span>
                 </label>
               </div>
-            </div>
+            </fieldset>
           </div>
         </div>
 
@@ -102,7 +102,7 @@
               </div>
             </div>
 
-            <button type="button" class="btn-ghost" id="btn-advanced">Show advanced parameters</button>
+            <button type="button" class="btn-ghost" id="btn-advanced" aria-expanded="false" aria-controls="advanced-inputs">Show advanced parameters</button>
 
             <div class="hidden" id="advanced-inputs">
               <div class="bd-row">
@@ -147,7 +147,7 @@
               <thead>
                 <tr id="results-thead-row"></tr>
               </thead>
-              <tbody id="results-body"></tbody>
+              <tbody id="results-body" aria-live="polite"></tbody>
             </table>
           </div>
         </div>
@@ -178,8 +178,8 @@
               <label for="dlco-weight" id="dlco-label-weight">Weight (kg)</label>
               <input id="dlco-weight" type="number" min="40" max="200" step="0.1" value="70">
             </div>
-            <div class="field-group">
-              <label id="dlco-label-sex">Sex</label>
+            <fieldset class="field-group">
+              <legend id="dlco-label-sex">Sex</legend>
               <div class="radio-group">
                 <label class="radio-label">
                   <input type="radio" name="dlco-sex" value="1" checked>
@@ -190,8 +190,9 @@
                   <span id="dlco-label-female">Female</span>
                 </label>
               </div>
-            </div>
+            </fieldset>
           </div>
+          <small id="dlco-age-warning" class="hint" style="color:var(--red)" aria-live="polite"></small>
         </div>
 
         <!-- 2. Measured values -->
@@ -223,7 +224,7 @@
               <thead>
                 <tr id="dlco-results-thead-row"></tr>
               </thead>
-              <tbody id="dlco-results-body"></tbody>
+              <tbody id="dlco-results-body" aria-live="polite"></tbody>
             </table>
           </div>
         </div>

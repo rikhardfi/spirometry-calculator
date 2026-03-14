@@ -116,6 +116,19 @@ const translations = {
     dlcoInterpSevere: 'Clearly reduced diffusing capacity',
     dlcoInterpRef: 'Interpretation: Timonen et al. Suom Lääkärilehti. 2021;76(24-32):1566-1568.',
     dlcoFooterRef: 'Kainu A et al. Reference values for pulmonary diffusing capacity for adult native Finns. Scand J Clin Lab Invest. 2017;77(2):135-142.',
+    dlcoAgeWarning: 'Age outside reference range (18–83 years). Results are extrapolated.',
+    dlcoHelpSteps: [
+      'Enter patient age, height, weight, and sex.',
+      'Enter measured DL\u1d04\u1d0f, DL\u1d04\u1d0f/V\u1d00, and/or V\u1d00 values.',
+      'Results update automatically \u2014 predicted values, LLN, z-scores, and percent predicted.',
+      'Severity is classified per Finnish recommendation (Timonen et al. 2021): normal, mildly reduced, or clearly reduced.',
+    ],
+    dlcoHelpBackground: [
+      'Reference values are from Kainu et al. (2017), based on 631 healthy non-smoking Finnish adults aged 18\u201383.',
+      'Equation: predicted = exp(a\u2080 + a\u2081\u00D7age + a\u2082\u00D7ln(age) + a\u2083\u00D7(1/height) + a\u2084\u00D7weight).',
+      'LLN is the 5th percentile: predicted \u2212 1.645 \u00D7 SD. Values below LLN are abnormal.',
+      'Severity: normal (z \u2265 \u22121.65), mildly reduced (\u22123.0 \u2264 z < \u22121.65), clearly reduced (z < \u22123.0).',
+    ],
   },
   fi: {
     title: 'Spirometrian viitearvot',
@@ -234,6 +247,19 @@ const translations = {
     dlcoInterpSevere: 'Selvästi pienentynyt diffuusiokapasiteetti',
     dlcoInterpRef: 'Tulkinta: Timonen ym. Suom Lääkärilehti. 2021;76(24-32):1566-1568.',
     dlcoFooterRef: 'Kainu A ym. Reference values for pulmonary diffusing capacity for adult native Finns. Scand J Clin Lab Invest. 2017;77(2):135-142.',
+    dlcoAgeWarning: 'Ik\u00E4 viitearvoalueen ulkopuolella (18\u201383 v). Tulokset ovat ekstrapoloituja.',
+    dlcoHelpSteps: [
+      'Sy\u00F6t\u00E4 potilaan ik\u00E4, pituus, paino ja sukupuoli.',
+      'Sy\u00F6t\u00E4 mitatut DL\u1d04\u1d0f-, DL\u1d04\u1d0f/V\u1d00- ja/tai V\u1d00-arvot.',
+      'Tulokset p\u00E4ivittyv\u00E4t automaattisesti \u2014 ennustetut arvot, LLN, z-pisteet ja prosentti ennustetusta.',
+      'Vaikeusaste arvioidaan suomalaisen suosituksen mukaan (Timonen ym. 2021): normaali, liev\u00E4sti pienentynyt tai selv\u00E4sti pienentynyt.',
+    ],
+    dlcoHelpBackground: [
+      'Viitearvot perustuvat Kainun ym. (2017) tutkimukseen, jossa oli 631 tervett\u00E4 suomalaista aikuista (18\u201383 v).',
+      'Yht\u00E4l\u00F6: ennustettu = exp(a\u2080 + a\u2081\u00D7ik\u00E4 + a\u2082\u00D7ln(ik\u00E4) + a\u2083\u00D7(1/pituus) + a\u2084\u00D7paino).',
+      'LLN on 5. persentiili: ennustettu \u2212 1,645 \u00D7 SD. LLN:n alittavat arvot ovat poikkeavia.',
+      'Vaikeusaste: normaali (z \u2265 \u22121,65), liev\u00E4sti pienentynyt (\u22123,0 \u2264 z < \u22121,65), selv\u00E4sti pienentynyt (z < \u22123,0).',
+    ],
   },
 };
 

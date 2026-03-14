@@ -44,8 +44,14 @@ function switchTab(tab) {
   els.panelSpiro.classList.toggle('active', tab === 'spiro');
   els.panelDlco.classList.toggle('active', tab === 'dlco');
 
-  // Update footer for active tab
+  // Update header subtitle, footer, help, and title for active tab
+  const sub = tab === 'dlco' ? t('dlcoSubtitle') : t('subtitle');
+  document.getElementById('app-subtitle').textContent = sub;
+  document.title = tab === 'dlco'
+    ? t('dlcoTitle') + ' — Kainu et al. (2017)'
+    : t('title') + ' — Kainu et al. (2015)';
   updateFooter();
+  renderHelp();
 }
 
 function updateFooter() {
@@ -347,6 +353,12 @@ function updateDlcoResults() {
     return;
   }
 
+  // Age range warning
+  const dlcoWarn = document.getElementById('dlco-age-warning');
+  if (dlcoWarn) {
+    dlcoWarn.textContent = (age < 18 || age > 83) ? t('dlcoAgeWarning') : '';
+  }
+
   // Table headers
   els.dlcoResultsTheadRow.innerHTML = `
     <th scope="col">${t('thParam')}</th>
@@ -516,8 +528,10 @@ function updateAllText() {
 }
 
 function renderHelp() {
-  const steps = t('helpSteps');
-  const bg = t('helpBackground');
+  const stepsKey = activeTab === 'dlco' ? 'dlcoHelpSteps' : 'helpSteps';
+  const bgKey = activeTab === 'dlco' ? 'dlcoHelpBackground' : 'helpBackground';
+  const steps = t(stepsKey);
+  const bg = t(bgKey);
   let html = `<h3>${t('helpTitle')}</h3><ol>`;
   steps.forEach((s) => (html += `<li>${s}</li>`));
   html += '</ol>';
@@ -561,6 +575,7 @@ function init() {
     els.advancedInputs.classList.toggle('hidden');
     const showAdvanced = !els.advancedInputs.classList.contains('hidden');
     els.btnAdvanced.textContent = showAdvanced ? t('btnHideAdvanced') : t('btnAdvanced');
+    els.btnAdvanced.setAttribute('aria-expanded', showAdvanced);
     updateResults();
   });
 
